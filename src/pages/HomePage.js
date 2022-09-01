@@ -27,39 +27,28 @@ const initialValues = {
 };
 
 export default function HomePage() {
-  const [resultadoExpressao, setResultado] = useState("")
-  
-  function onSubmitForm(values) {
-    let campoNome = values.nome;
-    let campoA = values.campoA;
-    let campoB = values.campoB;
-    let campoC = values.campoC;
-    let resultadoCalculaMedida = Calculador.CalculaMedida(campoA, campoB, campoC);
-    let resultadoCalculaMedidaExpressao = Calculador.CalculaMedidaExpressao(resultadoCalculaMedida, campoC, campoNome);
-    setResultado(resultadoCalculaMedidaExpressao);
-  }
-
-  function abreAjuda() {
-    alert(`
-      App calculador
-      a --- c
-      b --- x
-      x=(b*c)/a
-    `);
-  }
+  const [resultadoExpressao, setResultado] = useState("0.0")
 
   return (
     <Container>
       <Formik
         initialValues={initialValues}
-        onSubmit={onSubmitForm}
+        onSubmit={(values, formikHelpers) => {
+          let campoNome = values.nome;
+          let campoA = values.campoA;
+          let campoB = values.campoB;
+          let campoC = values.campoC;
+          let resultadoCalculaMedida = Calculador.CalculaMedida(campoA, campoB, campoC);
+          let resultadoCalculaMedidaExpressao = Calculador.CalculaMedidaExpressao(resultadoCalculaMedida, campoC, campoNome);
+          setResultado(resultadoCalculaMedidaExpressao);
+        }}
         validationSchema={validationSchema}
       >
-        {({ values }) => (
+        {({ values, setFieldValue }) => (
           <Form>
             <Row>
-              <Col md={12}>
-                <h1 class="text-center">App Calculador v3</h1>
+              <Col md={12} className="mb-5 mt-3">
+                <h1 className="text-center">App Calculador v3</h1>
               </Col>
               <Campo
                 label="Nome"
@@ -67,6 +56,7 @@ export default function HomePage() {
                 id="campo_nome"
                 name="campo_nome"
                 placeholder="Nome da medida"
+                value={values.nome}
               />
               <Campo
                 label="Campo A"
@@ -74,6 +64,7 @@ export default function HomePage() {
                 id="campo_a"
                 name="campo_a"
                 placeholder="Medida campo A"
+                value={values.campoA}
               />
               <Campo
                 label="Campo B"
@@ -81,6 +72,7 @@ export default function HomePage() {
                 id="campo_b"
                 name="campo_b"
                 placeholder="Medida campo B"
+                value={values.campoB}
               />
               <Campo
                 label="Campo C"
@@ -88,25 +80,40 @@ export default function HomePage() {
                 id="campo_c"
                 name="campo_c"
                 placeholder="Medida campo C"
+                value={values.campoC}
               />
-              <Col md={12} className="text-center">
+              <Col md={12} className="text-center mt-4">
                 <h2>Resultado</h2>
                 <h3>{resultadoExpressao}</h3>
               </Col>
-              <Col md={12} className="text-center">
+              <Col md={12} className="text-center mt-3">
                 <ButtonGroup>
                   <Button
                     type="submit"
                     color="primary"
                   >Calcular</Button>
                   <Button
-                    type="reset"
+                    type="button"
                     color="danger"
+                    onClick={() => {
+                      setFieldValue("nome", "");
+                      setFieldValue("campoA", "");
+                      setFieldValue("campoB", "");
+                      setFieldValue("campoC", "");
+                      setResultado("0.0");
+                    }}
                   >Limpar</Button>
                   <Button
                     type="button"
                     color="info"
-                    onClick={abreAjuda}
+                    onClick={() => {
+                      alert(`
+                        App calculador
+                        a --- c
+                        b --- x
+                        x=(b*c)/a
+                      `);
+                    }}
                   >Ajuda</Button>
                 </ButtonGroup>
               </Col>
@@ -120,15 +127,16 @@ export default function HomePage() {
 
 function Campo(props) {
   return (
-    <Col md={12}>
+    <Col md={12} className="mb-3">
       <InputGroup>
         <InputGroupText>{props.label}</InputGroupText>
         <Field
           type={props.type}
-          class="form-control"
+          className="form-control"
           id={props.id}
           name={props.name}
           placeholder={props.placeholder}
+          value={props.value}
         />
       </InputGroup>
       <ErrorMessage
@@ -145,4 +153,5 @@ Campo.propTypes = {
   id: PropTypes.string,
   name: PropTypes.string,
   placeholder: PropTypes.string,
+  value: PropTypes.any,
 };
